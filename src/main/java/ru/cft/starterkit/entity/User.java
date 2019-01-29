@@ -11,12 +11,12 @@ public class User {
 
     private String login;
 
-    @JsonIgnore
-    private String password;
-
     private String name;
 
     private String phone;
+
+    @JsonIgnore
+    private String password;
 
     @JsonIgnore
     private UUID baz;
@@ -38,15 +38,16 @@ public class User {
     }
     // Login
     public String getLogin() { return login;}
-    public void setLogin(String foo) { this.login = login;}
+    public void setLogin(String login) { this.login = login;}
     // Password
-    public String setPassword() { return password;}
+    public String getPassword() { return password;}
+    public void setPassword(String password) { this.password = password;}
     // Name
     public String getName() { return name;}
     public void setName(String name) { this.name = name;}
     // Phone
     public String getPhone() { return phone;}
-    public void setPhone(String Phone) { this.phone = phone;}
+    public void setPhone(String phone) { this.phone = phone;}
 
     // Baz
     public UUID getBaz() { return baz;}

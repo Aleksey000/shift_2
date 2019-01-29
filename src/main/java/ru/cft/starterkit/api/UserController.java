@@ -6,16 +6,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.cft.starterkit.entity.User;
 import ru.cft.starterkit.exception.ObjectNotFoundException;
+import ru.cft.starterkit.service.implement.AuthService;
 import ru.cft.starterkit.service.implement.UserService;
 
 @RestController
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthService authService) {
         this.userService = userService;
+        this.authService = authService;
     }
 
     // Login
@@ -29,11 +32,7 @@ public class UserController {
             @RequestParam(name = "login") String login,
             @RequestParam(name = "password") String password
             ) {
-        try {
-            return userService.login(login, password);
-        } catch (ObjectNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
+        return authService.login(login, password);
     }
 
     // Update profile
@@ -44,13 +43,19 @@ public class UserController {
             produces = "application/json"
     )
     public User update(
-            @RequestParam(name = "login") String login,
+//            @RequestParam(name = "login") String login,
             @RequestParam(name = "password") String password,
             @RequestParam(name = "name") String name,
             @RequestParam(name = "phone") String phone
     ) {
         try {
-            return userService.update(login, password, name, phone);
+            User user = authService.getCurrentUser();
+//            user.setLogin(login);
+            user.setName(name);
+            user.setPhone(phone);
+            user.setPassword(password);
+
+            return userService.update(user);
         } catch (ObjectNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
@@ -69,7 +74,13 @@ public class UserController {
             @RequestParam(name = "name") String name,
             @RequestParam(name = "phone") String phone
     ) {
-        return userService.add(login, password, name, phone);
+
+
+        try {
+            return userService.add(login, password, name, phone);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.FOUND, e.getMessage(), e);
+        }
     }
 
     // View other profile
@@ -96,11 +107,7 @@ public class UserController {
     )
     public User getMyProfile(
     ) {
-        try {
-            return userService.getCurrentUser();
-        } catch (ObjectNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
+        return authService.getCurrentUser();
     }
 
     //Logout
@@ -109,8 +116,9 @@ public class UserController {
             path = "/logout",
             produces = "application/json"
     )
-    public Boolean logOut(
+    public String logOut(
     ) {
-        return userService.logOut();
+        // TODO Сделать норм ответ
+        return "{isOk: " + (authService.logOut() == true ? "true" : "false")  + "}";
     }
 }

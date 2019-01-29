@@ -1,5 +1,6 @@
 package ru.cft.starterkit.service.implement;
 
+import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.cft.starterkit.entity.User;
@@ -18,28 +19,23 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User add(String login, String password, String name, String phone) {
-        return userRepository.add(new User(login, password, name, phone, UUID.randomUUID()));
+    public User add(String login, String password, String name, String phone) throws Exception {
+        try {
+            userRepository.getByLogin(login);
+            throw new Exception("User already exist!");
+        } catch (ObjectNotFoundException e) {
+            return userRepository.add(new User(login, password, name, phone, UUID.randomUUID()));
+        }
     }
 
     public User get(Long id) throws ObjectNotFoundException {
         return userRepository.get(id);
     }
 
-    public User getCurrentUser() throws ObjectNotFoundException{
-        return new User("","", "", "", UUID.randomUUID());
+    public User update(User user) throws ObjectNotFoundException{
+        userRepository.update(user);
+        return user;
     }
 
-    public User update(String login, String password, String name, String phone) throws ObjectNotFoundException{
-        return new User("","", "", "", UUID.randomUUID());
-    }
-
-    public User login(String login, String password) throws ObjectNotFoundException {
-        return new User("","", "", "", UUID.randomUUID());
-    }
-
-    public Boolean logOut(){
-        return true;
-    }
 
 }

@@ -19,25 +19,49 @@ public class UserRepository {
 
     private final Map<Long, User> storage = new ConcurrentHashMap<>();
 
-//    @Override
     public User add(User user) {
         user.setId(idCounter.incrementAndGet());
         storage.put(user.getId(), user);
 
-        log.info("Added new sample entity to storage: {}", user);
+        log.info("Added new user to storage: {}", user);
         return user;
     }
 
-//    @Override
+    public User update(User user) throws ObjectNotFoundException {
+        if (user == null) {
+            throw new ObjectNotFoundException(String.format("User not found"));
+        }
+        storage.put(user.getId(), user);
+
+        log.info("Update user to storage: {}", user);
+        return user;
+    }
+
     public User get(Long id) throws ObjectNotFoundException {
         User user = storage.get(id);
 
         if (user == null) {
-            log.error("Failed to get sample entity with id '{}' from storage", id);
-            throw new ObjectNotFoundException(String.format("Sample entity with id %s not found", id));
+            log.error("Failed to get user with id '{}' from storage", id);
+            throw new ObjectNotFoundException(String.format("User with id %s not found", id));
         }
 
-        log.info("Returned sample entity with id '{}' from storage: {}", id, user);
+        log.info("Returned user with id '{}' from storage: {}", id, user);
+        return user;
+    }
+
+    public User getByLogin(String login) throws ObjectNotFoundException {
+        User user = null;
+        for(Map.Entry<Long, User> entry: storage.entrySet()) {
+            if(entry.getValue().getLogin().equals(login)) {
+                return entry.getValue();
+            }
+        }
+
+        if (user == null) {
+            log.error("Failed to get user with login '{}' from storage", login);
+            throw new ObjectNotFoundException(String.format("User with login %s not found", login));
+        }
+
         return user;
     }
 }
