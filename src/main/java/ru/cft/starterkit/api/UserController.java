@@ -9,6 +9,8 @@ import ru.cft.starterkit.exception.ObjectNotFoundException;
 import ru.cft.starterkit.service.implement.AuthService;
 import ru.cft.starterkit.service.implement.UserService;
 
+import java.util.HashMap;
+
 @RestController
 public class UserController {
 
@@ -116,9 +118,10 @@ public class UserController {
             path = "/logout",
             produces = "application/json"
     )
-    public String logOut(
+    public HashMap<String, Boolean> logOut(
     ) {
-        // TODO Сделать норм ответ
-        return "{isOk: " + (authService.logOut() == true ? "true" : "false")  + "}";
+        HashMap<String, Boolean> answer = new HashMap<>();
+        answer.put("isOk", authService.logOut());
+        return answer;
     }
 }

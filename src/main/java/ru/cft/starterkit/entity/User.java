@@ -75,8 +75,8 @@ public class User {
         return "SampleEntity{" +
                 "id=" + id +
                 ", foo='" + login + '\'' +
-                ", bar=" + name +
-                ", bar=" + phone +
+                ", name=" + name +
+                ", phone=" + phone +
                 ", baz=" + baz +
                 '}';
     }
