@@ -2,11 +2,12 @@ package ru.cft.starterkit.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Item {
+public class Item implements Serializable {
 
     private Long id;
     private String title;

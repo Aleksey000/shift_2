@@ -2,10 +2,12 @@ package ru.cft.starterkit.repository.implement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.cft.starterkit.entity.Item;
 import ru.cft.starterkit.exception.ObjectNotFoundException;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,15 +19,74 @@ public class ItemRepository {
 
     private static final Logger log = LoggerFactory.getLogger(SampleEntityRepositoryImpl.class);
 
-    private final AtomicLong idCounter = new AtomicLong();
+    private AtomicLong idCounter = new AtomicLong();
 
-    private final Map<Long, Item> storage = new ConcurrentHashMap<>();
+    private Map<Long, Item> storage = new ConcurrentHashMap<>();
+
+    @Autowired
+    public ItemRepository(){
+        FileInputStream fileIn = null;
+        ObjectInputStream in = null;
+        try {
+            fileIn = new FileInputStream(".\\tmpdata\\item.ser");
+            in = new ObjectInputStream(fileIn);
+            this.storage = (Map<Long, Item>) in.readObject();
+        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            fileIn = new FileInputStream(".\\tmpdata\\itemC.ser");
+            in = new ObjectInputStream(fileIn);
+            this.idCounter = (AtomicLong) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveDataToFile(){
+        File folder = new File(".\\tmpdata");
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+
+        FileOutputStream fileOut = null;
+        try {
+            fileOut = new FileOutputStream(".\\tmpdata\\item.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(this.storage);
+            out.close();
+            fileOut.close();
+
+            out = null;
+            fileOut = null;
+
+            fileOut = new FileOutputStream(".\\tmpdata\\itemC.ser");
+            out = new ObjectOutputStream(fileOut);
+            out.writeObject(this.idCounter);
+            out.close();
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public Item add(Item entity) {
         entity.setId(idCounter.incrementAndGet());
         storage.put(entity.getId(), entity);
 
         log.info("Added new Item to storage: {}", entity);
+        this.saveDataToFile();
         return entity;
     }
 
@@ -50,6 +111,7 @@ public class ItemRepository {
         }
 
         storage.remove(id);
+        this.saveDataToFile();
         log.info("Delete item with {} from storage", id);
     }
 
@@ -60,6 +122,7 @@ public class ItemRepository {
         storage.put(item.getId(), item);
 
         log.info("Update item to storage: {}", item);
+        this.saveDataToFile();
         return item;
     }
 

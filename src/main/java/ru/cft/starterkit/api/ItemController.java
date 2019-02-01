@@ -11,6 +11,7 @@ import ru.cft.starterkit.exception.ObjectNotFoundException;
 import ru.cft.starterkit.service.implement.AuthService;
 import ru.cft.starterkit.service.implement.ItemService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.List;
 @RestController
 public class ItemController {
 
+    @Autowired
+    private HttpServletRequest request;
     private final ItemService itemService;
     private final AuthService authService;
 
@@ -46,7 +49,7 @@ public class ItemController {
     )
     public List<Item> myItems(
     ) {
-        User user = authService.getCurrentUser();
+        User user = authService.getCurrentUser(this.request.getSession());
         return itemService.list(user.getId());
     }
 
@@ -95,11 +98,11 @@ public class ItemController {
     )
     public Item create(
             @RequestParam(name = "title") String title,
-            @RequestParam(name = "date_to_end") @DateTimeFormat(pattern = "dd-MM-yyyy") Date date_to_end,
+            @RequestParam(name = "date_to_end") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date_to_end,
             @RequestParam(name = "price") Long price,
             @RequestParam(name = "description") String description
     ) {
-        User user = authService.getCurrentUser();
+        User user = authService.getCurrentUser(this.request.getSession());
         return itemService.add(title, description, price, date_to_end, user.getId());
     }
 

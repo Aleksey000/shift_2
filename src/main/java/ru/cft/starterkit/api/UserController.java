@@ -9,10 +9,14 @@ import ru.cft.starterkit.exception.ObjectNotFoundException;
 import ru.cft.starterkit.service.implement.AuthService;
 import ru.cft.starterkit.service.implement.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 
 @RestController
 public class UserController {
+
+    @Autowired
+    private HttpServletRequest request;
 
     private final UserService userService;
     private final AuthService authService;
@@ -34,7 +38,7 @@ public class UserController {
             @RequestParam(name = "login") String login,
             @RequestParam(name = "password") String password
             ) {
-        return authService.login(login, password);
+        return authService.login(login, password, this.request.getSession());
     }
 
     // Update profile
@@ -51,7 +55,7 @@ public class UserController {
             @RequestParam(name = "phone") String phone
     ) {
         try {
-            User user = authService.getCurrentUser();
+            User user = authService.getCurrentUser(this.request.getSession());
 //            user.setLogin(login);
             user.setName(name);
             user.setPhone(phone);
@@ -109,7 +113,7 @@ public class UserController {
     )
     public User getMyProfile(
     ) {
-        return authService.getCurrentUser();
+        return authService.getCurrentUser(this.request.getSession());
     }
 
     //Logout
@@ -121,7 +125,7 @@ public class UserController {
     public HashMap<String, Boolean> logOut(
     ) {
         HashMap<String, Boolean> answer = new HashMap<>();
-        answer.put("isOk", authService.logOut());
+        answer.put("isOk", authService.logOut(this.request.getSession()));
         return answer;
     }
 }

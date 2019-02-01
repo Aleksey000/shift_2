@@ -8,6 +8,8 @@ import ru.cft.starterkit.entity.User;
 import ru.cft.starterkit.exception.ObjectNotFoundException;
 import ru.cft.starterkit.repository.implement.UserRepository;
 
+import javax.servlet.http.HttpSession;
+
 @Service
 public class AuthService {
 
@@ -18,11 +20,13 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
-    public Boolean isLogin(){
-        return true;
+    public Boolean isLogin(HttpSession session){
+        Long id = (Long) session.getAttribute("user_id");
+
+        return id != null;
     }
 
-    public User login(String login, String password){
+    public User login(String login, String password, HttpSession session){
         User user = null;
         try {
             user = userRepository.getByLogin(login);
@@ -30,6 +34,7 @@ public class AuthService {
             if (!user.getPassword().equals(password)) {
                 throw new ObjectNotFoundException(String.format("Wrong password"));
             } else {
+                session.setAttribute("user_id", user.getId().toString());
                 return user;
             }
         } catch (ObjectNotFoundException e) {
@@ -37,13 +42,17 @@ public class AuthService {
         }
     }
 
-    public Boolean logOut(){
+    public Boolean logOut(HttpSession session){
+        session.removeAttribute("user_id");
         return true;
     }
 
-    public User getCurrentUser(){
+    public User getCurrentUser(HttpSession session){
         try {
-            return userRepository.get(1l);
+            System.out.println( session.getAttribute("user_id").toString());
+            Long id = Long.parseLong(session.getAttribute("user_id").toString());
+
+            return userRepository.get(id);
         } catch (ObjectNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
